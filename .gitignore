@@ -1,0 +1,30 @@
+# Exclude mermaid repositories
+mermaid/
+mermaid-live-editor/
+
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+*.log
+*.tgz
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
