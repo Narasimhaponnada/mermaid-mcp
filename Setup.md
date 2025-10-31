@@ -47,20 +47,42 @@ This guide walks you through setting up a **Model Context Protocol (MCP) server*
 
 ## Quick Start
 
-### 1. Clone and Setup the MCP Server
+### Method 1: Install from NPM (Easiest - Recommended)
 
 ```bash
-# Navigate to your workspace
-cd ~/Documents/Mermaid
+# Install globally (recommended for most users)
+npm install -g @narasimhaponnada/mermaid-mcp-server
 
-# Clone the repository (or use existing directory)
-cd mermaid-mcp-server
+# Verify installation
+mermaid-mcp --version
+# Output: mermaid-mcp 1.0.1
+
+# The server is now ready! Skip to Configuration section below.
+```
+
+**Benefits:**
+- ✅ One command installation
+- ✅ Automatic updates with `npm update -g`
+- ✅ Works from any directory
+- ✅ No need to manage source code
+
+---
+
+### Method 2: Install from Source (For Development)
+
+```bash
+# Clone the repository
+git clone https://github.com/Narasimhaponnada/mermaid-mcp.git
+cd mermaid-mcp/mermaid-mcp-server
 
 # Install dependencies (includes Puppeteer for browser-based rendering)
 npm install
 
 # Build the TypeScript server
 npm run build
+
+# Test the build
+node dist/index.js --version
 ```
 
 ### 2. Project Dependencies
@@ -148,11 +170,36 @@ Configure the MCP server in your VS Code settings or global MCP config.
 
 ### 2. GitHub Copilot Integration
 
-#### Option A: VS Code Settings (Recommended)
+#### Option A: VS Code Settings - NPM Install (Easiest)
+
+If you installed via NPM globally, simply use:
 
 1. Open VS Code Command Palette (`Cmd+Shift+P` on Mac, `Ctrl+Shift+P` on Windows/Linux)
 2. Type: **"Preferences: Open User Settings (JSON)"**
 3. Add the MCP server configuration:
+
+```json
+{
+  "github.copilot.enable": {
+    "*": true,
+    "markdown": true,
+    "plaintext": true
+  },
+  "github.copilot.mcp.servers": {
+    "mermaid": {
+      "command": "mermaid-mcp"
+    }
+  }
+}
+```
+
+That's it! No paths to configure. The `mermaid-mcp` command is available globally.
+
+---
+
+#### Option B: VS Code Settings - Source Install
+
+If you installed from source, use the full path:
 
 ```json
 {

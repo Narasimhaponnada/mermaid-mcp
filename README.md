@@ -2,6 +2,8 @@
 
 > **AI-powered Mermaid diagram generation using Model Context Protocol (MCP)**
 
+[![npm version](https://badge.fury.io/js/%40narasimhaponnada%2Fmermaid-mcp-server.svg)](https://www.npmjs.com/package/@narasimhaponnada/mermaid-mcp-server)
+[![npm downloads](https://img.shields.io/npm/dm/@narasimhaponnada/mermaid-mcp-server.svg)](https://www.npmjs.com/package/@narasimhaponnada/mermaid-mcp-server)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-1.0.4-purple.svg)](https://modelcontextprotocol.io/)
@@ -45,10 +47,24 @@ Mermaid/
 
 ### Installation
 
+#### Option 1: Install from NPM (Recommended)
+
+```bash
+# Global installation - easiest way to get started
+npm install -g @narasimhaponnada/mermaid-mcp-server
+
+# Test the installation
+mermaid-mcp --version
+
+# The server is now ready to use with Copilot/Claude!
+```
+
+#### Option 2: Install from Source
+
 ```bash
 # Clone the repository
-git clone https://github.com/NarasimhaPonnada/Mermaid.git
-cd Mermaid/mermaid-mcp-server
+git clone https://github.com/Narasimhaponnada/mermaid-mcp.git
+cd mermaid-mcp/mermaid-mcp-server
 
 # Install dependencies
 npm install
@@ -64,6 +80,18 @@ node generate-svg-samples.js
 
 Add to your VS Code settings (`Cmd+Shift+P` → "Preferences: Open User Settings (JSON)"):
 
+**If installed via NPM globally:**
+```json
+{
+  "github.copilot.mcp.servers": {
+    "mermaid": {
+      "command": "mermaid-mcp"
+    }
+  }
+}
+```
+
+**If installed from source:**
 ```json
 {
   "github.copilot.mcp.servers": {
