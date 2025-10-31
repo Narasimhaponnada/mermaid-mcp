@@ -31,6 +31,46 @@ import {
 
 // Import utilities
 import { initializeMermaid, cleanup } from './utils/mermaid.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// CLI preflight: support --version and --help without starting the server
+{
+  const args = process.argv.slice(2);
+  if (args.includes('--version') || args.includes('-v')) {
+    try {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      const pkgPath = path.resolve(__dirname, '..', 'package.json');
+      let pkg: any = undefined;
+      try {
+        pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      } catch (e) {
+        try {
+          const alt = path.resolve(process.cwd(), 'package.json');
+          pkg = JSON.parse(fs.readFileSync(alt, 'utf8'));
+        } catch (e2) {
+          console.log('mermaid-mcp (version unknown)');
+          process.exit(0);
+        }
+      }
+      console.log(`mermaid-mcp ${pkg.version || 'unknown'}`);
+      process.exit(0);
+    } catch (err) {
+      console.log('mermaid-mcp (version unknown)');
+      process.exit(0);
+    }
+  }
+
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('mermaid-mcp - Mermaid MCP Server');
+    console.log('Usage: mermaid-mcp [options]');
+    console.log('  --version, -v    Print version');
+    console.log('  --help, -h       Show this help');
+    process.exit(0);
+  }
+}
 
 /**
  * MCP Tool definitions with enhanced descriptions
