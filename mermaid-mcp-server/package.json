@@ -1,6 +1,6 @@
 {
   "name": "@narasimhaponnada/mermaid-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-powered Mermaid diagram generation using Model Context Protocol. Works with GitHub Copilot, Claude, and any MCP-compatible client. Generate flowcharts, sequence diagrams, architecture diagrams, and more from natural language.",
   "main": "dist/index.js",
   "type": "module",
