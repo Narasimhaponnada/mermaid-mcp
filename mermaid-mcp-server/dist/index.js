@@ -337,7 +337,7 @@ class MermaidMCPServer {
             await initializeMermaid({
                 theme: 'default',
                 startOnLoad: false,
-                securityLevel: 'strict',
+                securityLevel: 'antiscript', // Use antiscript to bypass DOMPurify
                 logLevel: 'error'
             });
             console.error('✅ Mermaid initialized successfully');

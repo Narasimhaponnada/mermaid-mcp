@@ -1,75 +1,45 @@
 {
   "name": "@narasimhaponnada/mermaid-mcp-server",
-  "version": "1.0.1",
-  "description": "AI-powered Mermaid diagram generation using Model Context Protocol. Works with GitHub Copilot, Claude, and any MCP-compatible client. Generate flowcharts, sequence diagrams, architecture diagrams, and more from natural language.",
+  "version": "1.0.2",
+  "description": "Model Context Protocol server for Mermaid diagram generation with GitHub Copilot integration",
   "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "mermaid-mcp": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "prepublishOnly": "npm run build",
-    "test": "echo \"Tests coming soon\" && exit 0",
-    "generate-samples": "node generate-svg-samples.js"
+    "prepare": "npm run build"
   },
   "keywords": [
     "mcp",
     "model-context-protocol",
     "mermaid",
-    "mermaid-diagrams",
     "diagrams",
-    "flowchart",
-    "sequence-diagram",
-    "architecture-diagram",
     "github-copilot",
-    "claude-ai",
-    "ai-tools",
-    "ai-assistant",
-    "svg",
-    "visualization",
-    "diagram-generation",
-    "typescript",
-    "developer-tools",
-    "documentation",
-    "devtools"
+    "ai-assistant"
   ],
-  "author": "Narasimha Rao Ponnada <narasimha.ponnada@hotmail.com>",
+  "author": "Narasimha Rao Ponnada",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Narasimhaponnada/mermaid-mcp.git",
-    "directory": "mermaid-mcp-server"
-  },
-  "bugs": {
-    "url": "https://github.com/Narasimhaponnada/mermaid-mcp/issues"
-  },
-  "homepage": "https://github.com/Narasimhaponnada/mermaid-mcp#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
+    "@types/dompurify": "^3.0.5",
+    "dompurify": "^3.3.0",
+    "jsdom": "^23.0.1",
+    "mermaid": "11.11.0",
+    "pako": "^2.1.0",
     "puppeteer": "^23.10.4"
   },
   "devDependencies": {
+    "@types/jsdom": "^21.1.6",
     "@types/node": "^22.10.1",
+    "@types/pako": "^2.0.3",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
-  "bin": {
-    "mermaid-mcp": "./dist/index.js"
-  },
-  "files": [
-    "dist/",
-    "src/",
-    "examples/",
-    "generate-svg-samples.js",
-    "README.md",
-    "PROJECT-SUMMARY.md",
-    "LICENSE",
-    "tsconfig.json"
-  ],
-  "publishConfig": {
-    "access": "public"
+    "node": ">=18.0.0"
   }
 }

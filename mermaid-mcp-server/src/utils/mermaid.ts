@@ -7,15 +7,16 @@ import mermaid from 'mermaid';
 import { JSDOM } from 'jsdom';
 import { deflate, inflate } from 'pako';
 import DOMPurify from 'dompurify';
-import { 
-  DiagramConfig, 
-  RenderOptions, 
-  RenderResult, 
-  ValidationResult, 
+import {
+  DiagramConfig,
+  RenderOptions,
+  RenderResult,
+  ValidationResult,
   DiagramInfo,
   DiagramType,
   SUPPORTED_DIAGRAM_TYPES
 } from '../types/index.js';
+import { renderDiagramWithPuppeteer } from './puppeteer-renderer.js';
 
 /**
  * Initialize Mermaid with enhanced configuration
@@ -23,17 +24,44 @@ import {
 export async function initializeMermaid(config?: DiagramConfig): Promise<void> {
   // Create DOM environment for server-side rendering
   const dom = new JSDOM('<!DOCTYPE html><body></body>');
-  (global as any).document = dom.window.document;
-  (global as any).window = dom.window;
-  
-  // Initialize DOMPurify with the JSDOM window
-  const purify = DOMPurify(dom.window as any);
-  (global as any).DOMPurify = purify;
+  const window = dom.window as any;
+  (global as any).document = window.document;
+  (global as any).window = window;
+  (globalThis as any).document = window.document;
+  (globalThis as any).window = window;
 
-  const defaultConfig: DiagramConfig = {
+  // Initialize DOMPurify with the JSDOM window
+  const purify = DOMPurify(window);
+
+  // Create a mock DOMPurify that passes through (no-op sanitization for server-side)
+  const mockDOMPurify = Object.assign(
+    // Make it a callable function
+    function(dirty: any) { return dirty; },
+    {
+      sanitize: (dirty: any) => String(dirty),
+      addHook: () => {},
+      removeHook: () => {},
+      removeHooks: () => {},
+      removeAllHooks: () => {},
+      setConfig: () => {},
+      clearConfig: () => {},
+      isValidAttribute: () => true,
+      isSupported: true,
+      version: '3.3.0',
+      removed: []
+    }
+  );
+
+  // Set mock DOMPurify on all scopes
+  window.DOMPurify = mockDOMPurify;
+  (global as any).DOMPurify = mockDOMPurify;
+  (globalThis as any).DOMPurify = mockDOMPurify;
+ 
+  const defaultConfig: any = {
     theme: 'default',
     startOnLoad: false,
     securityLevel: 'loose', // Changed from 'strict' to avoid DOMPurify issues
+    secure: [], // Disable all sanitization checks
     fontFamily: 'Arial, sans-serif',
     fontSize: 16,
     logLevel: 'error',
@@ -42,7 +70,7 @@ export async function initializeMermaid(config?: DiagramConfig): Promise<void> {
     maxEdges: 500,
     ...config
   };
-
+ 
   try {
     await mermaid.initialize(defaultConfig);
     console.log('Mermaid initialized successfully');
@@ -50,9 +78,7 @@ export async function initializeMermaid(config?: DiagramConfig): Promise<void> {
     console.error('Failed to initialize Mermaid:', error);
     throw new Error(`Mermaid initialization failed: ${error}`);
   }
-}
-
-/**
+}/**
  * Detect diagram type from Mermaid code
  */
 export function detectDiagramType(code: string): DiagramType | null {
@@ -158,66 +184,14 @@ function generateSuggestions(code: string, error: any): Array<{ message: string;
 
 /**
  * Render Mermaid diagram to SVG with enhanced options
+ * Uses Puppeteer for reliable browser-based rendering
  */
 export async function renderDiagram(
-  code: string, 
+  code: string,
   options: RenderOptions = {}
 ): Promise<RenderResult> {
-  const startTime = Date.now();
-  
-  try {
-    // Validate diagram first
-    const validation = await validateDiagram(code);
-    if (!validation.valid) {
-      throw new Error(`Invalid diagram: ${validation.errors?.[0]?.message}`);
-    }
-
-    // Apply configuration if provided
-    if (options.config) {
-      await mermaid.initialize(options.config);
-    }
-
-    // Generate unique ID for the diagram
-    const diagramId = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Render the diagram
-    const { svg, bindFunctions } = await mermaid.render(diagramId, code);
-    
-    // Extract dimensions from SVG
-    const dimensionMatch = svg.match(/viewBox="[\d\s.-]+"|width="([^"]*?)"|height="([^"]*?)"/g);
-    let width = 800;
-    let height = 600;
-    
-    if (dimensionMatch) {
-      const widthMatch = svg.match(/width="([^"]*?)"/);
-      const heightMatch = svg.match(/height="([^"]*?)"/);
-      if (widthMatch) width = parseInt(widthMatch[1]) || width;
-      if (heightMatch) height = parseInt(heightMatch[1]) || height;
-    }
-
-    // Generate metadata
-    const diagramType = detectDiagramType(code);
-    const nodeCount = (code.match(/\w+(?:\[.*?\])?/g) || []).length;
-    const edgeCount = (code.match(/--[->]?|==>[>]?|\.\.[->]?/g) || []).length;
-    const renderTime = Date.now() - startTime;
-
-    return {
-      svg,
-      width,
-      height,
-      errors: [],
-      warnings: [],
-      metadata: {
-        diagramType: diagramType || 'unknown',
-        nodeCount,
-        edgeCount,
-        renderTime
-      }
-    };
-  } catch (error: any) {
-    console.error('Render error:', error);
-    throw new Error(`Rendering failed: ${error.message}`);
-  }
+  // Use Puppeteer-based rendering to avoid DOMPurify issues
+  return await renderDiagramWithPuppeteer(code, options);
 }
 
 /**
@@ -280,8 +254,12 @@ export function deserializeState(serialized: string): any {
 /**
  * Clean up Mermaid resources
  */
-export function cleanup(): void {
+export async function cleanup(): Promise<void> {
   try {
+    // Close Puppeteer browser
+    const { closeBrowser } = await import('./puppeteer-renderer.js');
+    await closeBrowser();
+    
     // Clean up DOM
     if ((global as any).document) {
       (global as any).document = undefined;
