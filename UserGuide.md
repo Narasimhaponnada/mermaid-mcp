@@ -3,6 +3,7 @@
 
 > **Complete guide to using the Mermaid MCP Server with GitHub Copilot, Claude, and other AI assistants**
 
+[![npm version](https://badge.fury.io/js/%40narasimhaponnada%2Fmermaid-mcp-server.svg)](https://www.npmjs.com/package/@narasimhaponnada/mermaid-mcp-server)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![MCP](https://img.shields.io/badge/MCP-1.0.4-purple.svg)](https://modelcontextprotocol.io/)
 [![Mermaid](https://img.shields.io/badge/Mermaid-10.0+-blue.svg)](https://mermaid.js.org/)
@@ -10,6 +11,10 @@
 ## Overview
 
 The **Mermaid MCP (Model Context Protocol) Server** enables AI assistants like GitHub Copilot, Claude, and custom LLM applications to generate, validate, and render professional Mermaid diagrams directly within your development workflow. This guide covers all functionality, integration methods, and usage patterns.
+
+> **💡 Quick Install:** `npm install -g @narasimhaponnada/mermaid-mcp-server`
+> 
+> This guide shows **NPM installation as the recommended method** throughout. Source installation is also documented for developers who want to modify the code.
 
 ## 📋 Table of Contents
 
@@ -36,11 +41,27 @@ The **Mermaid MCP (Model Context Protocol) Server** enables AI assistants like G
 
 ### ⚡ 3-Step Quick Start
 
-#### 1️⃣ Verify MCP Server is Running
+#### 1️⃣ Install the MCP Server
 
+**Option A: Install from NPM (Recommended)**
 ```bash
-# Check if server is configured (should return tool list)
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node ~/Documents/Mermaid/mermaid-mcp-server/dist/index.js
+# Install globally - works from anywhere
+npm install -g @narasimhaponnada/mermaid-mcp-server
+
+# Verify installation
+mermaid-mcp --version
+# Output: mermaid-mcp 1.0.1
+```
+
+**Option B: Install from Source (For Development)**
+```bash
+# Clone and build from source
+git clone https://github.com/Narasimhaponnada/mermaid-mcp.git
+cd mermaid-mcp/mermaid-mcp-server
+npm install && npm run build
+
+# Verify build
+node dist/index.js --version
 ```
 
 #### 2️⃣ Use with GitHub Copilot Chat
@@ -68,11 +89,25 @@ The Mermaid MCP Server supports multiple integration methods for different use c
 
 **Best for:** Daily development workflow, documentation writing, code reviews
 
-**Setup:**
+**Setup Option A: NPM Installation (Easiest)**
 ```json
 // Add to VS Code settings.json (Cmd+Shift+P -> "Preferences: Open User Settings (JSON)")
 {
-  "github.copilot.mcp.servers": {
+  "github.copilot.chat.mcp.enabled": true,
+  "github.copilot.chat.mcp.servers": {
+    "mermaid": {
+      "command": "mermaid-mcp"
+    }
+  }
+}
+```
+
+**Setup Option B: Source Installation**
+```json
+// Add to VS Code settings.json
+{
+  "github.copilot.chat.mcp.enabled": true,
+  "github.copilot.chat.mcp.servers": {
     "mermaid": {
       "command": "node",
       "args": ["/absolute/path/to/mermaid-mcp-server/dist/index.js"]
@@ -102,7 +137,19 @@ The Mermaid MCP Server supports multiple integration methods for different use c
 
 **Best for:** Standalone diagram generation, brainstorming, documentation outside IDE
 
-**Setup:**
+**Setup Option A: NPM Installation (Recommended)**
+```json
+// Edit: ~/Library/Application Support/Claude/claude_desktop_config.json
+{
+  "mcpServers": {
+    "mermaid": {
+      "command": "mermaid-mcp"
+    }
+  }
+}
+```
+
+**Setup Option B: Source Installation**
 ```json
 // Edit: ~/Library/Application Support/Claude/claude_desktop_config.json
 {
@@ -130,7 +177,19 @@ Claude: I'll use the Mermaid MCP server to generate that...
 
 **Best for:** AI-first development environment with built-in MCP support
 
-**Setup:**
+**Setup Option A: NPM Installation (Recommended)**
+```json
+// Add to Cursor settings (Settings -> MCP Servers)
+{
+  "mcpServers": {
+    "mermaid": {
+      "command": "mermaid-mcp"
+    }
+  }
+}
+```
+
+**Setup Option B: Source Installation**
 ```json
 // Add to Cursor settings (Settings -> MCP Servers)
 {
@@ -151,7 +210,17 @@ Claude: I'll use the Mermaid MCP server to generate that...
 
 **Best for:** Automation, scripts, CI/CD pipelines, batch generation
 
-**Generate SVG Files:**
+**Option A: Using NPM Package (Recommended)**
+```bash
+# If installed globally
+mermaid-mcp --help
+mermaid-mcp --version
+
+# Run the server (for MCP protocol communication)
+mermaid-mcp
+```
+
+**Option B: Using Source Code**
 ```bash
 cd ~/Documents/Mermaid/mermaid-mcp-server
 
@@ -212,9 +281,15 @@ await generateDiagram('graph TD\n  A[Start] --> B[End]', 'output.svg');
 npm install -g @modelcontextprotocol/inspector
 ```
 
-**Run:**
+**Run with NPM Package (Recommended):**
 ```bash
-# Start inspector with your MCP server
+# Start inspector with globally installed MCP server
+mcp-inspector mermaid-mcp
+```
+
+**Run with Source:**
+```bash
+# Start inspector with source code
 mcp-inspector node ~/Documents/Mermaid/mermaid-mcp-server/dist/index.js
 ```
 
@@ -230,15 +305,14 @@ mcp-inspector node ~/Documents/Mermaid/mermaid-mcp-server/dist/index.js
 
 **Best for:** Building your own AI apps with diagram generation
 
-**Example: Node.js Integration**
+**Example: Node.js Integration (NPM Package)**
 ```typescript
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
-// Create MCP client
+// Create MCP client (using globally installed NPM package)
 const transport = new StdioClientTransport({
-  command: 'node',
-  args: ['/path/to/mermaid-mcp-server/dist/index.js']
+  command: 'mermaid-mcp'
 });
 
 const client = new Client({
