@@ -4,9 +4,17 @@
 # Stage 1: Build stage
 FROM node:18-slim AS builder
 
-# Cache buster - change this to force rebuild  
-ARG CACHE_BUST=2025-11-04-17-45-FORCE-REBUILD
-RUN echo "Cache bust: $CACHE_BUST"
+# Version tagging for build tracking (DevOps best practice)
+ARG BUILD_VERSION=1.0.0
+ARG BUILD_DATE
+ARG GIT_COMMIT
+LABEL version="${BUILD_VERSION}"
+LABEL build_date="${BUILD_DATE}"
+LABEL git_commit="${GIT_COMMIT}"
+
+# Cache buster - change this to force rebuild
+ARG CACHE_BUST=2025-11-04-21-00-UMD-STATIC-WITH-CRASHFIX
+RUN echo "🏷️  Build Version: $BUILD_VERSION | Date: $BUILD_DATE | Commit: $GIT_COMMIT | Cache: $CACHE_BUST"
 
 WORKDIR /build
 
@@ -64,13 +72,16 @@ RUN cd server && npm ci --omit=dev --ignore-scripts && npm cache clean --force
 RUN groupadd -r appuser && useradd -r -g appuser appuser \
     && chown -R appuser:appuser /app
 
-# Set environment variables
+# Set environment variables (including version info for runtime verification)
 ENV NODE_ENV=production \
     PORT=3000 \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_DOWNLOAD=true \
-    MCP_SERVER_PATH=/app/server/dist/index.js
+    MCP_SERVER_PATH=/app/server/dist/index.js \
+    BUILD_VERSION=${BUILD_VERSION} \
+    BUILD_DATE=${BUILD_DATE} \
+    GIT_COMMIT=${GIT_COMMIT}
 
 # Expose port
 EXPOSE 3000
