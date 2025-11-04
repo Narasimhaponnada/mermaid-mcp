@@ -34,9 +34,9 @@ async function initBrowser(): Promise<Browser> {
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--disable-crash-reporter',
-        '--disable-extensions',
-        '--disable-features=NetworkService',
-        '--disable-background-networking'
+        '--no-crash-upload',
+        '--disable-breakpad',
+        '--disable-extensions'
       ]
     });
     console.log('✅ Browser launched successfully');
@@ -47,6 +47,13 @@ async function initBrowser(): Promise<Browser> {
 /**
  * Render diagram using Puppeteer
  */
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 export async function renderDiagramWithPuppeteer(
   code: string,
   options: RenderOptions = {}
@@ -69,17 +76,21 @@ export async function renderDiagramWithPuppeteer(
     await page.setViewport({ width: 1920, height: 1080 });
     console.log('✅ Viewport set');
     
-    // Create HTML with Mermaid from CDN (Railway has internet access)
-    console.log('📦 Loading Mermaid from CDN...');
+    // Load Mermaid UMD bundle from local node_modules (NO internet required!)
+    console.log('📦 Loading Mermaid from local UMD bundle...');
+    const mermaidPath = join(__dirname, '../../node_modules/mermaid/dist/mermaid.min.js');
+    const mermaidCode = readFileSync(mermaidPath, 'utf-8');
     
     const html = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  <script>
+    // Inline Mermaid UMD library (no CDN dependency, no module resolution issues)
+    ${mermaidCode}
     
+    // Initialize mermaid (it's now available as global)
     mermaid.initialize({
       startOnLoad: false,
       theme: '${options.config?.theme || 'default'}',
@@ -88,7 +99,6 @@ export async function renderDiagramWithPuppeteer(
       logLevel: 'error'
     });
     
-    window.mermaid = mermaid;
     window.renderReady = true;
   </script>
 </head>

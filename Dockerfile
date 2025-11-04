@@ -4,6 +4,10 @@
 # Stage 1: Build stage
 FROM node:18-slim AS builder
 
+# Cache buster - change this to force rebuild  
+ARG CACHE_BUST=2025-11-04-17-45-FORCE-REBUILD
+RUN echo "Cache bust: $CACHE_BUST"
+
 WORKDIR /build
 
 # Copy all source code and dependencies
@@ -81,4 +85,4 @@ USER appuser
 # Start the connector
 WORKDIR /app/connector
 CMD ["node", "dist/cli.js", "rest"]
-# Railway rebuild - Tue Nov  4 16:45:00 +04 2025 - Force rebuild with CDN fix
+# Railway rebuild - Tue Nov  4 17:15:00 +04 2025 - Force clean rebuild with crash fix
