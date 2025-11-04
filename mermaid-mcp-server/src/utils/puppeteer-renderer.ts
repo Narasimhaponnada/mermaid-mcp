@@ -33,6 +33,8 @@ async function initBrowser(): Promise<Browser> {
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
+        '--disable-crash-reporter',
+        '--disable-extensions',
         '--disable-features=NetworkService',
         '--disable-background-networking'
       ]
