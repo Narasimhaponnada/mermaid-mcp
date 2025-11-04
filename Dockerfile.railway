@@ -1,0 +1,12 @@
+# Railway deployment - Use pre-built image from Docker Hub
+# This ensures the EXACT tested and working image is deployed
+FROM narasimharaoponnada/mermaid-mcp:1.0.0-umd-static
+
+# Image already contains:
+# - Node.js 18
+# - Chromium with all dependencies
+# - Mermaid MCP Server with UMD static bundle
+# - All crash reporter fixes
+# - Production dependencies
+
+# No additional build steps needed - image is ready to run
