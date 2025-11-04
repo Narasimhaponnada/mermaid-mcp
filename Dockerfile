@@ -79,3 +79,4 @@ USER appuser
 # Start the connector
 WORKDIR /app/connector
 CMD ["node", "dist/cli.js", "rest"]
+# Railway rebuild - Tue Nov  4 16:07:12 +04 2025
