@@ -42,7 +42,8 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    && apt-get clean \
+    && ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
 WORKDIR /app
 
@@ -64,6 +65,7 @@ ENV NODE_ENV=production \
     PORT=3000 \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    PUPPETEER_SKIP_DOWNLOAD=true \
     MCP_SERVER_PATH=/app/server/dist/index.js
 
 # Expose port
