@@ -19,6 +19,7 @@ async function initBrowser(): Promise<Browser> {
                           '/usr/bin/chromium-browser' || 
                           undefined;
     
+    console.log('🏷️  CODE VERSION: 1.0.0-umd-static-dockerhub-v2 🏷️');
     console.log('🔍 Puppeteer executable path:', executablePath);
     console.log('🔍 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD:', process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD);
     console.log('🔍 PUPPETEER_SKIP_DOWNLOAD:', process.env.PUPPETEER_SKIP_DOWNLOAD);
