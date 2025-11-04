@@ -1,0 +1,54 @@
+{
+  "name": "@narasimhaponnada/mermaid-mcp-connector",
+  "version": "1.0.0",
+  "description": "Universal connector for Mermaid MCP Server - works with GitHub Copilot, ChatGPT, Claude, and custom AI assistants",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "mermaid-connector": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "node --test",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "mermaid",
+    "connector",
+    "github-copilot",
+    "chatgpt",
+    "claude",
+    "ai-assistant",
+    "diagram-generation",
+    "integration",
+    "plugin",
+    "extension"
+  ],
+  "author": "Narasimha Rao Ponnada <narasimha.ponnada@hotmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Narasimhaponnada/mermaid-mcp.git",
+    "directory": "mcp-connector"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ws": "^8.14.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

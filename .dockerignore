@@ -1,0 +1,54 @@
+# Node modules
+node_modules
+*/node_modules
+**/node_modules
+
+# Build outputs
+dist
+*/dist
+**/dist
+build
+*/build
+**/build
+
+# Logs
+*.log
+npm-debug.log*
+logs
+
+# Testing
+coverage
+.nyc_output
+test-results
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary
+tmp
+temp
+*.tmp
+
+# SVG outputs (don't include in image)
+*.svg
+
+# Test files
+test-*.js
+test-*.ts

@@ -14,15 +14,30 @@ let browser: Browser | null = null;
  */
 async function initBrowser(): Promise<Browser> {
   if (!browser) {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || 
+                          '/usr/bin/chromium' || 
+                          '/usr/bin/chromium-browser' || 
+                          undefined;
+    
+    console.log('🔍 Puppeteer executable path:', executablePath);
+    console.log('🔍 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD:', process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD);
+    console.log('🔍 PUPPETEER_SKIP_DOWNLOAD:', process.env.PUPPETEER_SKIP_DOWNLOAD);
+    console.log('🔍 Node version:', process.version);
+    console.log('🔍 Working directory:', process.cwd());
+    
     browser = await puppeteer.launch({
       headless: true,
+      executablePath,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-gpu'
+        '--disable-gpu',
+        '--disable-features=NetworkService',
+        '--disable-background-networking'
       ]
     });
+    console.log('✅ Browser launched successfully');
   }
   return browser;
 }
@@ -36,14 +51,25 @@ export async function renderDiagramWithPuppeteer(
 ): Promise<RenderResult> {
   const startTime = Date.now();
   
+  console.log('🎨 Starting diagram render...');
+  console.log('📝 Diagram code:', code.substring(0, 100) + (code.length > 100 ? '...' : ''));
+  
   const browser = await initBrowser();
   const page = await browser.newPage();
+  
+  // Enable console logs from the browser page
+  page.on('console', msg => console.log('🌐 Browser console:', msg.type(), msg.text()));
+  page.on('pageerror', error => console.error('❌ Browser error:', error.message));
+  page.on('requestfailed', request => console.error('❌ Request failed:', request.url(), request.failure()?.errorText));
   
   try {
     // Set viewport
     await page.setViewport({ width: 1920, height: 1080 });
+    console.log('✅ Viewport set');
     
-    // Create HTML with Mermaid
+    // Create HTML with Mermaid from CDN (Railway has internet access)
+    console.log('📦 Loading Mermaid from CDN...');
+    
     const html = `
 <!DOCTYPE html>
 <html>
@@ -70,16 +96,23 @@ export async function renderDiagramWithPuppeteer(
 </html>
     `;
     
+    console.log('📄 Setting page content...');
     await page.setContent(html);
+    console.log('✅ Page content set');
     
     // Wait for Mermaid to be ready
-    await page.waitForFunction('window.renderReady === true', { timeout: 10000 });
+    console.log('⏳ Waiting for Mermaid to load from CDN...');
+    await page.waitForFunction('window.renderReady === true', { timeout: 30000 });
+    console.log('✅ Mermaid loaded and ready');
     
     // Render the diagram
+    console.log('🎨 Rendering diagram with Mermaid...');
     const result = await page.evaluate(async (diagramCode) => {
       try {
+        console.log('Evaluating in browser context...');
         const diagramId = 'mermaid-diagram';
         const { svg } = await (window as any).mermaid.render(diagramId, diagramCode);
+        console.log('SVG rendered, length:', svg.length);
         
         // Extract dimensions
         const parser = new DOMParser();
@@ -88,12 +121,15 @@ export async function renderDiagramWithPuppeteer(
         
         const width = parseInt(svgEl?.getAttribute('width') || '800');
         const height = parseInt(svgEl?.getAttribute('height') || '600');
+        console.log('Dimensions:', width, 'x', height);
         
         return { svg, width, height };
       } catch (error: any) {
+        console.error('Rendering error in browser:', error);
         throw new Error(error.message || 'Rendering failed');
       }
     }, code);
+    console.log('✅ Diagram rendered successfully');
     
     const renderTime = Date.now() - startTime;
     
