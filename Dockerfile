@@ -13,7 +13,7 @@ LABEL build_date="${BUILD_DATE}"
 LABEL git_commit="${GIT_COMMIT}"
 
 # Cache buster - change this to force rebuild
-ARG CACHE_BUST=2025-11-05-GITHUB-DEPLOY-FRESH-BUILD
+ARG CACHE_BUST=1762325611-FORCE-REBUILD
 RUN echo "🏷️  Build Version: $BUILD_VERSION | Date: $BUILD_DATE | Commit: $GIT_COMMIT | Cache: $CACHE_BUST"
 
 WORKDIR /build
