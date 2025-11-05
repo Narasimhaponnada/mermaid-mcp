@@ -68,7 +68,72 @@ app.post('/api/diagram/generate', async (req: Request, res: Response) => {
       filename
     });
 
-    res.json({ success: true, result });
+    // Extract SVG and Mermaid code from MCP response
+    let svg = '';
+    let mermaidCode = code || '';
+    let metadata: any = {};
+
+    // Parse MCP response content
+    if (result.content && Array.isArray(result.content)) {
+      for (const item of result.content) {
+        if (item.type === 'text' && item.text) {
+          // Extract SVG from markdown code block
+          const svgMatch = item.text.match(/```svg\n([\s\S]*?)\n```/);
+          if (svgMatch) {
+            svg = svgMatch[1];
+          }
+          
+          // Extract Mermaid code from markdown code block
+          const mermaidMatch = item.text.match(/```mermaid\n([\s\S]*?)\n```/);
+          if (mermaidMatch) {
+            mermaidCode = mermaidMatch[1];
+          }
+          
+          // Extract metadata (Type, Dimensions, etc.)
+          const typeMatch = item.text.match(/\*\*Type:\*\*\s*(\w+)/);
+          const dimensionsMatch = item.text.match(/\*\*Dimensions:\*\*\s*(\d+)x(\d+)px/);
+          const renderTimeMatch = item.text.match(/\*\*Render Time:\*\*\s*(\d+)ms/);
+          const nodesMatch = item.text.match(/\*\*Nodes:\*\*\s*(\d+)/);
+          const edgesMatch = item.text.match(/\*\*Edges:\*\*\s*(\d+)/);
+          const fileMatch = item.text.match(/\*\*File:\*\*\s*(.+)/);
+          
+          if (typeMatch || dimensionsMatch || renderTimeMatch) {
+            metadata = {
+              diagramType: typeMatch ? typeMatch[1] : 'unknown',
+              width: dimensionsMatch ? parseInt(dimensionsMatch[1]) : 800,
+              height: dimensionsMatch ? parseInt(dimensionsMatch[2]) : 600,
+              renderTime: renderTimeMatch ? parseInt(renderTimeMatch[1]) : 0,
+              nodeCount: nodesMatch ? parseInt(nodesMatch[1]) : 0,
+              edgeCount: edgesMatch ? parseInt(edgesMatch[1]) : 0,
+              filepath: fileMatch ? fileMatch[1].trim() : undefined,
+              timestamp: new Date().toISOString()
+            };
+          }
+        }
+      }
+    }
+
+    // Enhanced response format for frontend integration
+    const enhancedResponse = {
+      success: true,
+      
+      // Raw SVG markup for inline rendering (dangerouslySetInnerHTML)
+      svg: svg,
+      
+      // Base64 Data URL for <img> tags
+      svgDataUrl: svg ? `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}` : '',
+      
+      // Mermaid code for editing/re-rendering
+      mermaidCode: mermaidCode,
+      
+      // Metadata for display
+      metadata: metadata,
+      
+      // Original MCP response (for debugging/advanced use)
+      raw: result
+    };
+
+    res.json(enhancedResponse);
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
